@@ -12,6 +12,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class User {
@@ -32,4 +34,6 @@ public class User {
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Past(message = "Дата рождения не может быть в будущем")
     LocalDate birthday;
+
+    final Set<Long> friends = new HashSet<>();
 }
