@@ -20,6 +20,8 @@ import lombok.Data;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Film.
@@ -47,4 +49,6 @@ public class Film {
     @PositiveDuration(message = "Продолжительность фильма должна быть указана и быть положительной", groups = Marker.OnCreate.class)
     @PositiveDuration(message = "Продолжительность фильма должна быть положительной", groups = Marker.OnUpdate.class, allowNull = true)
     Duration duration;
+
+    Set<Long> likes = new HashSet<>();
 }

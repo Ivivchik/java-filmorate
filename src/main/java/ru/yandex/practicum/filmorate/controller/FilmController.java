@@ -1,73 +1,59 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import ru.yandex.practicum.filmorate.utils.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.utils.Marker;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
+import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.validation.Valid;
 
-import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Optional;
+import java.util.List;
 import java.util.Collection;
 
 @Validated
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private static final Logger log = LoggerFactory.getLogger(FilmController.class);
-    private Map<Long, Film> films = new HashMap<>();
+    private final FilmService filmService;
 
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
     public Collection<Film> findAll() {
-        return films.values();
+        return filmService.findAll();
     }
 
     @PostMapping
     @Validated({Marker.OnCreate.class})
     public Film create(@Valid @RequestBody Film film) {
-        film.setId(getNextId());
-        films.put(film.getId(), film);
-
-        log.info("Фильм успешно добавлен");
-
-        return film;
+        return filmService.create(film);
     }
 
     @PutMapping
     @Validated({Marker.OnUpdate.class})
     public Film update(@Valid @RequestBody Film newFilm) {
-        Long id = newFilm.getId();
-
-        Film oldFilm = films.get(id);
-        if (oldFilm == null) {
-            log.error("Не удалось обновить данные фильма");
-            throw new NotFoundException("Фильм с id = " + newFilm.getId() + " не найден");
-        }
-
-        Optional.ofNullable(newFilm.getName()).ifPresent(oldFilm::setName);
-        Optional.ofNullable(newFilm.getDescription()).ifPresent(oldFilm::setDescription);
-        Optional.ofNullable(newFilm.getReleaseDate()).ifPresent(oldFilm::setReleaseDate);
-        Optional.ofNullable(newFilm.getDuration()).ifPresent(oldFilm::setDuration);
-
-        log.info("Данные фильма успешно обновлены");
-
-        return oldFilm;
+        return filmService.update(newFilm);
     }
 
-    private long getNextId() {
-        long currentMaxId = films.keySet()
-                .stream()
-                .mapToLong(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @PutMapping("/{id}/like/{userId}")
+    public Film setLike(@PathVariable Long id, @PathVariable Long userId) {
+        return filmService.setLike(id, userId);
     }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+        return filmService.deleteLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
+        return filmService.getPopularFilms(count);
+    }
+
 }
