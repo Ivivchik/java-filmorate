@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
 import java.util.List;
 
 @Slf4j
@@ -57,5 +58,17 @@ public class FilmService {
                 .sorted((f0, f1) -> f1.getLikes().size() - f0.getLikes().size())
                 .limit(count)
                 .toList();
+    }
+
+    public Collection<Film> findAll() {
+        return filmStorage.findAll();
+    }
+
+    public Film create(Film film) {
+        return filmStorage.create(film);
+    }
+
+    public Film update(Film newFilm) throws NotFoundException {
+        return filmStorage.update(newFilm);
     }
 }

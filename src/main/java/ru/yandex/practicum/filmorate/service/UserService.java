@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.utils.exception.DuplicatedDataException;
 import ru.yandex.practicum.filmorate.utils.exception.NotFoundException;
 
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -65,5 +67,17 @@ public class UserService {
                 .filter(otherUserFriend::contains)
                 .map(userStorage::findById)
                 .toList();
+    }
+
+    public Collection<User> findAll() {
+        return userStorage.findAll();
+    }
+
+    public User create(User user) throws DuplicatedDataException {
+        return userStorage.create(user);
+    }
+
+    public User update(User newUser) throws DuplicatedDataException, NotFoundException {
+        return userStorage.update(newUser);
     }
 }
