@@ -25,7 +25,6 @@
 | `description`  | VARCHAR(200) | A maximum length is of 200 characters | Description of the film         |
 | `release_date` | DATE         | Must be after December 28, 1985       | Release date of the film        |
 | `duration`     | INT          | Must be a positive value              | Duration of the film            |
-| `genre_id`     | INT          | Foreign key references genre table    | Identifier for genre            |
 | `rating_id`    | INT          | Foreign key references rating table   | Identifier for rating           |
 
 &nbsp;
