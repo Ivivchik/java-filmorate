@@ -67,6 +67,15 @@
 
 &nbsp;
 
+- ### film_genre - Stores the associations between films and their corresponding genres
+
+| Column     | Type | Constraint | Description     |
+|------------|------|------------|-----------------|
+| `film_id`  | INT  | -          | ID of the film  |
+| `genre_id` | INT  | -          | ID of the genre |
+
+&nbsp;
+
 ---
 
 ## Sample Queries
@@ -86,9 +95,9 @@
 - Get films with a specific genre:
 
 ```sql
-   SELECT f.* FROM films f
-     JOIN genre g ON f.genre_id = g.id
-    WHERE g.name = 'Мультфильм';
+   SELECT DISTINCT f.name FROM films f
+     JOIN film_genre fg ON f.id = fg.film_id
+    WHERE fg.genre_id in (SELECT id FROM genre WHERE name = 'Мультфильм');
 ```
 
 - Get all friendships where the user initiated the friend request
