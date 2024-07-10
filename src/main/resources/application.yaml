@@ -1,7 +1,12 @@
 logging.level.org.zalando.logbook: TRACE
 
 spring:
-  sql.init.mode: always
+  sql.init:
+    mode: always
+    schema-locations:
+      - classpath:/sql/schema.sql
+    data-locations:
+      - classpath:/sql/data.sql
   datasource:
     url: jdbc:h2:file:./db/filmorate
     username: sa
