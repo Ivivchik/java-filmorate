@@ -1,27 +1,26 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.users;
 
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.utils.exception.DuplicatedDataException;
+import ru.yandex.practicum.filmorate.storage.Storage;
 import ru.yandex.practicum.filmorate.utils.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.utils.exception.DuplicatedDataException;
 
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Set;
+import java.util.List;
+import java.util.Collection;
 
 @Slf4j
-@Service
-public class UserService {
-
-    private final UserStorage userStorage;
+@Service("userServiceInMemory")
+public class UserServiceInMemory implements UserService {
+    private final Storage<User> userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserServiceInMemory(@Qualifier("inMemoryUserStorage") Storage<User> userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -37,6 +36,7 @@ public class UserService {
         return user;
     }
 
+
     public User deleteFriend(Long id, Long friendId) throws NotFoundException {
         User user = userStorage.findById(id);
         User friend = userStorage.findById(friendId);
@@ -49,6 +49,7 @@ public class UserService {
         return user;
     }
 
+
     public List<User> findAllFriends(Long id) throws NotFoundException {
         User user = userStorage.findById(id);
 
@@ -56,6 +57,7 @@ public class UserService {
                 .map(userStorage::findById)
                 .toList();
     }
+
 
     public List<User> findAllCommonFriends(Long id, Long otherId) throws NotFoundException {
         User user = userStorage.findById(id);
@@ -68,6 +70,7 @@ public class UserService {
                 .map(userStorage::findById)
                 .toList();
     }
+
 
     public Collection<User> findAll() {
         return userStorage.findAll();
