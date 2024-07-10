@@ -19,18 +19,18 @@ import java.util.Collection;
 public class UserServiceDb implements UserService {
     private final BaseDbStorage<User> userStorage;
 
-    private final static String FIND_ALL_FRIENDS = "SELECT u.*, f.user_id as friend_id " +
+    private static final String FIND_ALL_FRIENDS = "SELECT u.*, f.user_id as friend_id " +
             "FROM friends f " +
             "LEFT JOIN users u on u.id = f.friend_id " +
             "WHERE f.user_id = ? ";
-    private final static String FIND_COMMON_FRIENDS = "SELECT u.*, f3.friend_id " +
+    private static final String FIND_COMMON_FRIENDS = "SELECT u.*, f3.friend_id " +
             "FROM friends f1 " +
             "JOIN friends f2 ON f1.friend_id = f2.friend_id " +
             "JOIN users u on u.id = f1.friend_id " +
             "LEFT JOIN friends f3 on f3.user_id = u.id " +
             "WHERE f1.user_id = ? and f2.user_id = ? and f1.approved = true";
-    private final static String DELETE_FRIEND = "DELETE FROM friends WHERE user_id = ? and friend_id = ?";
-    private final static String ADD_FRIEND = "INSERT INTO friends(user_id, friend_id, approved) VALUES (?, ?, true)";
+    private static final String DELETE_FRIEND = "DELETE FROM friends WHERE user_id = ? and friend_id = ?";
+    private static final String ADD_FRIEND = "INSERT INTO friends(user_id, friend_id, approved) VALUES (?, ?, true)";
 
     @Autowired
     public UserServiceDb(@Qualifier("userDbStorage") BaseDbStorage<User> userStorage) {
