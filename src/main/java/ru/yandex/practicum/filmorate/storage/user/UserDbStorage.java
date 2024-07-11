@@ -1,11 +1,10 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 
 import org.springframework.stereotype.Repository;
@@ -13,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.BaseDbStorage;
+import ru.yandex.practicum.filmorate.utils.Tuple2;
 import ru.yandex.practicum.filmorate.utils.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.utils.exception.DuplicatedDataException;
 
@@ -22,13 +22,10 @@ import java.util.*;
 @Repository("userDbStorage")
 public class UserDbStorage extends BaseDbStorage<User> {
 
-    private static final String FIND_ALL_QUERY = "SELECT u.*, f.friend_id " +
+    private static final String FIND_ALL_QUERY = "SELECT u.id, u.name, u.birthday, u.email, u.login, f.friend_id " +
             "FROM users u " +
             "LEFT JOIN friends f ON u.id = f.user_id";
-    private static final String FIND_BY_ID_QUERY = "SELECT u.*, f.friend_id " +
-            "FROM users u " +
-            "LEFT JOIN friends f ON u.id = f.user_id " +
-            "WHERE u.id = ? ";
+    private static final String FIND_BY_ID_QUERY = FIND_ALL_QUERY + " WHERE u.id = ? ";
 
     @Autowired
     protected UserDbStorage(JdbcTemplate jdbc, RowMapper<User> mapper, ResultSetExtractor<List<User>> extractor) {
@@ -46,13 +43,9 @@ public class UserDbStorage extends BaseDbStorage<User> {
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id");
 
-        Map<String, Object> m = new HashMap<>();
-        m.put("name", user.getName());
-        m.put("login", checkDuplicate("login", user.getLogin()));
-        m.put("email", checkDuplicate("email", user.getEmail()));
-        m.put("birthday", user.getBirthday());
+        Map<String, Object> userMap = userToMap(user);
 
-        Long id = simpleJdbcInsert.executeAndReturnKey(m).longValue();
+        Long id = simpleJdbcInsert.executeAndReturnKey(userMap).longValue();
         user.setId(id);
 
         log.info("User id=" + user.getId() + " successfully added");
@@ -63,38 +56,17 @@ public class UserDbStorage extends BaseDbStorage<User> {
     @Override
     public User update(User newUser) throws NotFoundException, DuplicatedDataException {
         Long userId = newUser.getId();
-        if (!isExists(userId)) {
-            log.error("Unable to update user data. Id: " + userId + " doesn't exist");
+
+        if (!isExists(userId, "users")) {
+            log.error("User id: " + userId + " doesn't exist");
             throw new NotFoundException("User с id = " + userId + " не найден");
         }
 
-        StringBuilder query = new StringBuilder("UPDATE users SET ");
-        List<Object> parameters = new ArrayList<>();
+        Tuple2<String, Object[]> queryAndParams = createUpdateQueryWithParams(newUser);
 
-        Optional.ofNullable(newUser.getName()).ifPresent(name -> {
-            parameters.add(name);
-            query.append("name = ?, ");
-        });
-        Optional.ofNullable(newUser.getBirthday()).ifPresent(birthday -> {
-            parameters.add(birthday);
-            query.append("birthday = ?, ");
-        });
-        Optional.ofNullable(newUser.getEmail()).ifPresent(email -> {
-            parameters.add(checkDuplicate("email", email));
-            query.append("email = ?, ");
-        });
-        Optional.ofNullable(newUser.getLogin()).ifPresent(login -> {
-            parameters.add(checkDuplicate("login", login));
-            query.append("login = ?, ");
-        });
-
-        query.delete(query.length() - 2, query.length());
-        query.append(" WHERE id = ?");
-        parameters.add(userId);
-
-        jdbc.update(query.toString(), parameters.toArray());
-
-        log.info("User data id=" + newUser.getId() + " successfully updated");
+        if (update(queryAndParams.getFirst(), queryAndParams.getSecond())) {
+            log.info("User data id=" + userId + " successfully updated");
+        }
 
         return findById(userId);
 
@@ -123,10 +95,42 @@ public class UserDbStorage extends BaseDbStorage<User> {
         return value;
     }
 
-    private boolean isExists(Long id) {
-        String query = "SELECT COUNT(1) FROM users WHERE id = ?";
-        int count = jdbc.queryForObject(query, Integer.class, id);
+    private Tuple2<String, Object[]> createUpdateQueryWithParams(User newUser) {
+        StringBuilder query = new StringBuilder("UPDATE users SET ");
+        List<Object> parameters = new ArrayList<>();
 
-        return count > 0;
+        Optional.ofNullable(newUser.getName()).ifPresent(name -> {
+            parameters.add(name);
+            query.append("name = ?, ");
+        });
+        Optional.ofNullable(newUser.getBirthday()).ifPresent(birthday -> {
+            parameters.add(birthday);
+            query.append("birthday = ?, ");
+        });
+        Optional.ofNullable(newUser.getEmail()).ifPresent(email -> {
+            parameters.add(checkDuplicate("email", email));
+            query.append("email = ?, ");
+        });
+        Optional.ofNullable(newUser.getLogin()).ifPresent(login -> {
+            parameters.add(checkDuplicate("login", login));
+            query.append("login = ?, ");
+        });
+
+        query.delete(query.length() - 2, query.length());
+        query.append(" WHERE id = ?");
+        parameters.add(newUser.getId());
+
+        return new Tuple2<>(query.toString(), parameters.toArray());
     }
+
+    private Map<String, Object> userToMap(User user) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("name", user.getName());
+        m.put("login", checkDuplicate("login", user.getLogin()));
+        m.put("email", checkDuplicate("email", user.getEmail()));
+        m.put("birthday", user.getBirthday());
+
+        return m;
+    }
+
 }
