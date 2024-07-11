@@ -1,9 +1,9 @@
 package ru.yandex.practicum.filmorate.storage;
 
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +30,7 @@ public abstract class BaseDbStorage<T> implements Storage<T> {
     }
 
     public List<T> findMany(String query, Object... params) {
-        return jdbc.query(query, mapper, params);
+        return jdbc.query(query, extractor, params);
     }
 
     public boolean delete(String query, Object... params) {
@@ -41,5 +41,12 @@ public abstract class BaseDbStorage<T> implements Storage<T> {
     public boolean update(String query, Object... params) {
         int rowUpdated = jdbc.update(query, params);
         return rowUpdated > 0;
+    }
+
+    public boolean isExists(Long id, String tableName) {
+        String query = "SELECT COUNT(1) FROM " + tableName + " WHERE id = ?";
+        int count = jdbc.queryForObject(query, Integer.class, id);
+
+        return count > 0;
     }
 }
