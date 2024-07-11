@@ -1,8 +1,9 @@
 package ru.yandex.practicum.filmorate.storage.user.mapper;
 
+import ru.yandex.practicum.filmorate.model.User;
+
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,9 +21,9 @@ public class UserRowMapper implements RowMapper<User> {
         user.setEmail(rs.getString("email"));
         user.setBirthday(rs.getObject("birthday", LocalDate.class));
 
-        while (rs.next()) {
+        do {
             user.getFriends().add(rs.getLong("friend_id"));
-        }
+        } while (rs.next());
 
         return user;
     }
