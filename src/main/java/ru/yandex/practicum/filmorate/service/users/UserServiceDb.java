@@ -38,8 +38,14 @@ public class UserServiceDb implements UserService {
     }
 
     public User addFriend(Long id, Long friendId) throws NotFoundException {
-        userStorage.findById(id);
-        userStorage.findById(friendId);
+        if (!userStorage.isExists(id, "users")) {
+            log.error("User id: " + id + " doesn't exist");
+            throw new NotFoundException("User с id = " + id + " не найден");
+        }
+        if (!userStorage.isExists(friendId, "users")) {
+            log.error("User id: " + friendId + " doesn't exist");
+            throw new NotFoundException("User с id = " + friendId + " не найден");
+        }
 
         if (userStorage.update(ADD_FRIEND, id, friendId)) {
             log.info("User id=" + id + " successfully added friend user id=" + friendId);
@@ -49,8 +55,14 @@ public class UserServiceDb implements UserService {
 
 
     public User deleteFriend(Long id, Long friendId) throws NotFoundException {
-        userStorage.findById(id);
-        userStorage.findById(friendId);
+        if (!userStorage.isExists(id, "users")) {
+            log.error("User id: " + id + " doesn't exist");
+            throw new NotFoundException("User с id = " + id + " не найден");
+        }
+        if (!userStorage.isExists(friendId, "users")) {
+            log.error("User id: " + friendId + " doesn't exist");
+            throw new NotFoundException("User с id = " + friendId + " не найден");
+        }
 
         if (userStorage.delete(DELETE_FRIEND, id, friendId)) {
             log.info("User id=" + id + " successfully removed friend user id=" + friendId);
@@ -59,12 +71,14 @@ public class UserServiceDb implements UserService {
         return userStorage.findById(id);
     }
 
-
     public List<User> findAllFriends(Long id) throws NotFoundException {
-        userStorage.findById(id);
+        if (!userStorage.isExists(id, "users")) {
+            log.error("User id: " + id + " doesn't exist");
+            throw new NotFoundException("User с id = " + id + " не найден");
+        }
+
         return userStorage.findMany(FIND_ALL_FRIENDS, id);
     }
-
 
     public List<User> findAllCommonFriends(Long id, Long otherId) throws NotFoundException {
         return userStorage.findMany(FIND_COMMON_FRIENDS, id, otherId);
@@ -77,7 +91,6 @@ public class UserServiceDb implements UserService {
     public User create(User user) throws DuplicatedDataException {
         return userStorage.create(user);
     }
-
 
     public User update(User newUser) throws DuplicatedDataException, NotFoundException {
         return userStorage.update(newUser);
