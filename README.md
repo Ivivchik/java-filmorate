@@ -21,7 +21,7 @@
 | Column         | Type         | Constraint                            | Description                     |
 |----------------|--------------|---------------------------------------|---------------------------------|
 | `id`           | INT          | Primary key                           | Unique identifier for each film |
-| `name`         | VARCHAR      | Not null                              | Name of the film                |
+| `name`         | VARCHAR      | Not null and not empty                | Name of the film                |
 | `description`  | VARCHAR(200) | A maximum length is of 200 characters | Description of the film         |
 | `release_date` | DATE         | Must be after December 28, 1985       | Release date of the film        |
 | `duration`     | INT          | Must be a positive value              | Duration of the film            |
@@ -138,10 +138,10 @@
 - Get 5 popular films
 
 ```sql
-   SELECT f.id, f.title, COUNT(ulf.user_id) as like_count
+   SELECT f.id, f.name, COUNT(ulf.user_id) as like_count
      FROM films f
 LEFT JOIN user_like_film ulf ON f.id = ulf.film_id
- GROUP BY f.id, f.title
+ GROUP BY f.id, f.name
  ORDER BY like_count DESC
     LIMIT 5;
 ```
