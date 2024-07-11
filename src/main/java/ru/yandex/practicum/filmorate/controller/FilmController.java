@@ -2,11 +2,12 @@ package ru.yandex.practicum.filmorate.controller;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.utils.Marker;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import jakarta.validation.Valid;
 
@@ -20,13 +21,18 @@ public class FilmController {
     private final FilmService filmService;
 
     @Autowired
-    public FilmController(FilmService filmService) {
+    public FilmController(@Qualifier("filmServiceDb") FilmService filmService) {
         this.filmService = filmService;
     }
 
     @GetMapping
     public Collection<Film> findAll() {
         return filmService.findAll();
+    }
+
+    @GetMapping("/{id}")
+    public Film getById(@PathVariable Long id) {
+        return filmService.findById(id);
     }
 
     @PostMapping
@@ -55,5 +61,4 @@ public class FilmController {
     public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
         return filmService.getPopularFilms(count);
     }
-
 }
