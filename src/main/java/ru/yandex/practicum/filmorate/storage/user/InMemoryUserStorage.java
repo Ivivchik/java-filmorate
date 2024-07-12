@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.Storage;
 import ru.yandex.practicum.filmorate.utils.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.utils.exception.DuplicatedDataException;
 
@@ -15,8 +16,8 @@ import java.util.Collection;
 import java.util.function.Function;
 
 @Slf4j
-@Component
-public class InMemoryUserStorage implements UserStorage {
+@Component("inMemoryUserStorage")
+public class InMemoryUserStorage implements Storage<User> {
     private final Map<Long, User> users = new HashMap<>();
 
     @Override

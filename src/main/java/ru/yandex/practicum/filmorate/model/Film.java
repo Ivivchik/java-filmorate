@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
 import ru.yandex.practicum.filmorate.utils.Marker;
-import ru.yandex.practicum.filmorate.utils.DurationSerializer;
-import ru.yandex.practicum.filmorate.utils.DurationDeserializer;
+import ru.yandex.practicum.filmorate.utils.serde.DurationSerializer;
+import ru.yandex.practicum.filmorate.utils.serde.DurationDeserializer;
 import ru.yandex.practicum.filmorate.utils.annotations.NullOrNotBlank;
 import ru.yandex.practicum.filmorate.utils.annotations.PositiveDuration;
 import ru.yandex.practicum.filmorate.utils.annotations.DateAfterBirthdayOfCinema;
@@ -21,6 +21,7 @@ import lombok.Data;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -51,4 +52,8 @@ public class Film {
     Duration duration;
 
     Set<Long> likes = new HashSet<>();
+
+    Set<Genre> genres = new LinkedHashSet<>();
+
+    Rating mpa = new Rating();
 }
